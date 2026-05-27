@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const verifyCache = require('../middleware/cache.middleware');
 const {
     getAllTodos,
     getTodoById,
@@ -12,8 +12,8 @@ const {
 
 
 // GET
-router.get('/', getAllTodos);
-router.get('/:id', getTodoById);
+router.get('/', verifyCache, getAllTodos);
+router.get('/:id', verifyCache, getTodoById);
 
 // POST
 router.post('/', createTodo);

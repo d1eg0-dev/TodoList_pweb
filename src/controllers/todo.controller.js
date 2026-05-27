@@ -1,4 +1,5 @@
 const Todo = require('../models/todo.model');
+const { cache } = require('../middleware/cache.middleware');
 
 
 // GET /api/todos
@@ -6,23 +7,50 @@ const getAllTodos = async (req, res) => {
 
     try {
 
-        const todos = await Todo.find();
+        // Página actual
+        const page = parseInt(req.query.page) || 1;
 
-        // Header personalizado
-        res.header('API-Version', '1.0');
+        // Cantidad por página
+        const limit = parseInt(req.query.limit) || 5;
+
+        // Cuántos documentos saltar
+        const skip = (page - 1) * limit;
+
+        // Obtener tareas paginadas
+        const todos = await Todo.find()
+            .skip(skip)
+            .limit(limit);
+
+        // Total de tareas
+        const total = await Todo.countDocuments();
+
+        // Total de páginas
+        const totalPages = Math.ceil(total / limit);
 
         res.status(200).json({
 
             metadata: {
-                total: todos.length,
-                version: '1.0',
-                author: 'Diego'
+                total,
+                totalPages,
+                currentPage: page,
+                limit
             },
 
             data: todos,
 
             links: {
-                self: '/api/todos'
+
+                self: `/api/todos?page=${page}&limit=${limit}`,
+
+                next:
+                    page < totalPages
+                        ? `/api/todos?page=${page + 1}&limit=${limit}`
+                        : null,
+
+                prev:
+                    page > 1
+                        ? `/api/todos?page=${page - 1}&limit=${limit}`
+                        : null
             }
 
         });
@@ -100,18 +128,29 @@ const createTodo = async (req, res) => {
         });
 
         await newTodo.save();
+        cache.flushAll();
 
         res.status(201).json({
 
             metadata: {
-                message: 'Tarea creada correctamente'
+                message: 'Tarea creada correctamente',
+                createdAt: newTodo.createdAt
             },
 
             data: newTodo,
 
             links: {
+
                 self: `/api/todos/${newTodo._id}`,
-                all: '/api/todos'
+
+                all: '/api/todos',
+
+                update: `/api/todos/${newTodo._id}`,
+
+                patch: `/api/todos/${newTodo._id}`,
+
+                delete: `/api/todos/${newTodo._id}`
+
             }
 
         });
@@ -144,6 +183,8 @@ const updateTodo = async (req, res) => {
                 new: true
             }
         );
+
+        cache.flushAll();
 
         if (!todo) {
 
@@ -191,6 +232,8 @@ const patchTodo = async (req, res) => {
             }
         );
 
+        cache.flushAll();
+
         if (!todo) {
 
             return res.status(404).json({
@@ -230,6 +273,7 @@ const deleteTodo = async (req, res) => {
     try {
 
         const todo = await Todo.findByIdAndDelete(req.params.id);
+        cache.flushAll();
 
         if (!todo) {
 
@@ -238,6 +282,8 @@ const deleteTodo = async (req, res) => {
             });
 
         }
+        
+        
 
         res.status(200).json({
 
