@@ -3,7 +3,7 @@ const { cache } = require('../middleware/cache.middleware');
 
 
 // GET /api/todos
-const getAllTodos = async (req, res) => {
+const getAllTodos = async (req, res, next) => {
 
     try {
 
@@ -27,13 +27,35 @@ const getAllTodos = async (req, res) => {
         // Total de páginas
         const totalPages = Math.ceil(total / limit);
 
+        // Headers personalizados
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
+        res.header('Cache-Control', 'no-cache');
+
         res.status(200).json({
 
             metadata: {
+
+                version: '1.0',
+
+                status: 200,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date(),
+
                 total,
+
                 totalPages,
+
                 currentPage: page,
+
                 limit
+
             },
 
             data: todos,
@@ -41,6 +63,12 @@ const getAllTodos = async (req, res) => {
             links: {
 
                 self: `/api/todos?page=${page}&limit=${limit}`,
+
+                create: '/api/todos',
+
+                docs: '/api/docs',
+
+                home: '/',
 
                 next:
                     page < totalPages
@@ -57,9 +85,7 @@ const getAllTodos = async (req, res) => {
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 
@@ -67,7 +93,7 @@ const getAllTodos = async (req, res) => {
 
 
 // GET /api/todos/:id
-const getTodoById = async (req, res) => {
+const getTodoById = async (req, res, next) => {
 
     try {
 
@@ -75,32 +101,60 @@ const getTodoById = async (req, res) => {
 
         if (!todo) {
 
-            return res.status(404).json({
-                message: 'Tarea no encontrada'
-            });
+            const err = new Error('Tarea no encontrada');
+
+            err.status = 404;
+
+            return next(err);
 
         }
+
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
 
         res.status(200).json({
 
             metadata: {
-                version: '1.0'
+
+                version: '1.0',
+
+                status: 200,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date()
+
             },
 
             data: todo,
 
             links: {
+
                 self: `/api/todos/${todo._id}`,
-                all: '/api/todos'
+
+                all: '/api/todos',
+
+                update: `/api/todos/${todo._id}`,
+
+                patch: `/api/todos/${todo._id}`,
+
+                delete: `/api/todos/${todo._id}`,
+
+                home: '/',
+
+                docs: '/api/docs'
+
             }
 
         });
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 
@@ -108,7 +162,7 @@ const getTodoById = async (req, res) => {
 
 
 // POST /api/todos
-const createTodo = async (req, res) => {
+const createTodo = async (req, res, next) => {
 
     try {
 
@@ -116,9 +170,11 @@ const createTodo = async (req, res) => {
 
         if (!title) {
 
-            return res.status(400).json({
-                message: 'El título es obligatorio'
-            });
+            const err = new Error('El título es obligatorio');
+
+            err.status = 400;
+
+            return next(err);
 
         }
 
@@ -128,13 +184,33 @@ const createTodo = async (req, res) => {
         });
 
         await newTodo.save();
+
+        // Limpiar cache
         cache.flushAll();
+
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
 
         res.status(201).json({
 
             metadata: {
+
+                version: '1.0',
+
+                status: 201,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date(),
+
                 message: 'Tarea creada correctamente',
+
                 createdAt: newTodo.createdAt
+
             },
 
             data: newTodo,
@@ -149,7 +225,11 @@ const createTodo = async (req, res) => {
 
                 patch: `/api/todos/${newTodo._id}`,
 
-                delete: `/api/todos/${newTodo._id}`
+                delete: `/api/todos/${newTodo._id}`,
+
+                home: '/',
+
+                docs: '/api/docs'
 
             }
 
@@ -157,9 +237,7 @@ const createTodo = async (req, res) => {
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 
@@ -167,11 +245,22 @@ const createTodo = async (req, res) => {
 
 
 // PUT /api/todos/:id
-const updateTodo = async (req, res) => {
+const updateTodo = async (req, res, next) => {
 
     try {
 
         const { title, completed } = req.body;
+
+        // Validar PUT completo
+        if (title === undefined || completed === undefined) {
+
+            const err = new Error('PUT requiere title y completed');
+
+            err.status = 400;
+
+            return next(err);
+
+        }
 
         const todo = await Todo.findByIdAndUpdate(
             req.params.id,
@@ -184,35 +273,63 @@ const updateTodo = async (req, res) => {
             }
         );
 
+        // Limpiar cache
         cache.flushAll();
 
         if (!todo) {
 
-            return res.status(404).json({
-                message: 'No existe'
-            });
+            const err = new Error('Tarea no encontrada');
+
+            err.status = 404;
+
+            return next(err);
 
         }
+
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
 
         res.status(200).json({
 
             metadata: {
+
+                version: '1.0',
+
+                status: 200,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date(),
+
                 message: 'Tarea actualizada'
+
             },
 
             data: todo,
 
             links: {
-                self: `/api/todos/${todo._id}`
+
+                self: `/api/todos/${todo._id}`,
+
+                all: '/api/todos',
+
+                patch: `/api/todos/${todo._id}`,
+
+                delete: `/api/todos/${todo._id}`,
+
+                home: '/'
+
             }
 
         });
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 
@@ -220,7 +337,7 @@ const updateTodo = async (req, res) => {
 
 
 // PATCH /api/todos/:id
-const patchTodo = async (req, res) => {
+const patchTodo = async (req, res, next) => {
 
     try {
 
@@ -232,35 +349,63 @@ const patchTodo = async (req, res) => {
             }
         );
 
+        // Limpiar cache
         cache.flushAll();
 
         if (!todo) {
 
-            return res.status(404).json({
-                message: 'No existe'
-            });
+            const err = new Error('Tarea no encontrada');
+
+            err.status = 404;
+
+            return next(err);
 
         }
+
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
 
         res.status(200).json({
 
             metadata: {
+
+                version: '1.0',
+
+                status: 200,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date(),
+
                 message: 'Tarea modificada'
+
             },
 
             data: todo,
 
             links: {
-                self: `/api/todos/${todo._id}`
+
+                self: `/api/todos/${todo._id}`,
+
+                all: '/api/todos',
+
+                update: `/api/todos/${todo._id}`,
+
+                delete: `/api/todos/${todo._id}`,
+
+                home: '/'
+
             }
 
         });
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 
@@ -268,40 +413,63 @@ const patchTodo = async (req, res) => {
 
 
 // DELETE /api/todos/:id
-const deleteTodo = async (req, res) => {
+const deleteTodo = async (req, res, next) => {
 
     try {
 
         const todo = await Todo.findByIdAndDelete(req.params.id);
+
+        // Limpiar cache
         cache.flushAll();
 
         if (!todo) {
 
-            return res.status(404).json({
-                message: 'No encontrado'
-            });
+            const err = new Error('Tarea no encontrada');
+
+            err.status = 404;
+
+            return next(err);
 
         }
-        
-        
+
+        res.header('API-Version', '1.0');
+        res.header('Author', 'Diego Mirabal');
 
         res.status(200).json({
 
             metadata: {
+
+                version: '1.0',
+
+                status: 200,
+
+                author: 'Diego Mirabal',
+
+                method: req.method,
+
+                endpoint: req.originalUrl,
+
+                timestamp: new Date(),
+
                 message: 'Tarea eliminada'
+
             },
 
             links: {
-                all: '/api/todos'
+
+                all: '/api/todos',
+
+                create: '/api/todos',
+
+                home: '/'
+
             }
 
         });
 
     } catch (error) {
 
-        res.status(500).json({
-            message: error.message
-        });
+        next(error);
 
     }
 

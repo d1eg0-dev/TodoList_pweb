@@ -1,6 +1,13 @@
 const express = require('express');
+
 const router = express.Router();
-const verifyCache = require('../middleware/cache.middleware');
+
+
+// Importar cache middleware
+const { cacheMiddleware } = require('../middleware/cache.middleware');
+
+
+// Importar controllers
 const {
     getAllTodos,
     getTodoById,
@@ -11,20 +18,63 @@ const {
 } = require('../controllers/todo.controller');
 
 
+// =========================
 // GET
-router.get('/', verifyCache, getAllTodos);
-router.get('/:id', verifyCache, getTodoById);
+// =========================
 
+// Lista con cache
+router.get(
+    '/',
+    cacheMiddleware,
+    getAllTodos
+);
+
+// Buscar por id con cache
+router.get(
+    '/:id',
+    cacheMiddleware,
+    getTodoById
+);
+
+
+// =========================
 // POST
-router.post('/', createTodo);
+// =========================
 
+router.post(
+    '/',
+    createTodo
+);
+
+
+// =========================
 // PUT
-router.put('/:id', updateTodo);
+// =========================
 
+router.put(
+    '/:id',
+    updateTodo
+);
+
+
+// =========================
 // PATCH
-router.patch('/:id', patchTodo);
+// =========================
 
+router.patch(
+    '/:id',
+    patchTodo
+);
+
+
+// =========================
 // DELETE
-router.delete('/:id', deleteTodo);
+// =========================
+
+router.delete(
+    '/:id',
+    deleteTodo
+);
+
 
 module.exports = router;

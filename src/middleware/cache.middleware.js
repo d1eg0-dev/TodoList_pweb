@@ -1,35 +1,47 @@
 const NodeCache = require('node-cache');
 
-// Cache por 60 segundos
+
+// Crear cache
 const cache = new NodeCache({
     stdTTL: 60
 });
 
-const verifyCache = (req, res, next) => {
+
+// Middleware cache
+const cacheMiddleware = (req, res, next) => {
 
     const key = req.originalUrl;
 
+    // Buscar en cache
     const cachedData = cache.get(key);
 
+    // Si existe en cache
     if (cachedData) {
 
-        console.log('Respuesta desde CACHE');
+        console.log('Datos obtenidos desde cache');
 
         return res.status(200).json(cachedData);
+
     }
 
-    console.log('Respuesta desde MONGODB');
+    // Guardar función original
+    const originalJson = res.json;
 
-    res.sendResponse = res.json;
-
-    res.json = (body) => {
+    // Sobrescribir json
+    res.json = function (body) {
 
         cache.set(key, body);
 
-        res.sendResponse(body);
+        return originalJson.call(this, body);
+
     };
 
     next();
+
 };
 
-module.exports = verifyCache;
+
+module.exports = {
+    cache,
+    cacheMiddleware
+};
