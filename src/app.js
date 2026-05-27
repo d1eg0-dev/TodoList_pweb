@@ -1,15 +1,17 @@
 const express = require('express');
 
+const cors = require('cors');
+
 const app = express();
 
-// Importar rutas
 const todoRoutes = require('./routes/todo.routes');
 
-// Importar middleware de errores
 const errorHandler = require('./middleware/error.middleware');
 
 
-// Middleware JSON
+// Middleware
+app.use(cors());
+
 app.use(express.json());
 
 
@@ -19,11 +21,11 @@ app.get('/', (req, res) => {
 });
 
 
-// Rutas API
+// Rutas
 app.use('/api/todos', todoRoutes);
 
 
-// Middleware global de errores
+// Middleware errores
 app.use(errorHandler);
 
 
