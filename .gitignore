@@ -1,2 +1,30 @@
-node_modules/
-.env
+# Dependencias
+**/node_modules/
+**/node_modules/**/*
+
+# Variables de entorno
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Logs
+**/npm-debug.log
+**/yarn-error.log
+**/*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Builds
+**/dist/
+**/build/
+**/.next/
+
+# Base de datos local
+**/*.db
+**/*.sqlite
