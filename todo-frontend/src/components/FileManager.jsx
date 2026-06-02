@@ -15,7 +15,9 @@ const FileManager = () => {
 
     const loadFiles = async () => {
         try {
-            const response = await axios.get(`${API_URL}/files`);
+            const response = await axios.get(`${API_URL}/files`, {
+                withCredentials: true  // <--- CAMBIO: enviar cookies de sesión
+            });
             setFiles(response.data);
         } catch (error) {
             console.error('Error al cargar archivos:', error);
@@ -39,7 +41,8 @@ const FileManager = () => {
         setLoading(true);
         try {
             await axios.post(`${API_URL}/upload`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true  // <--- CAMBIO: enviar cookies de sesión
             });
             alert('Archivo subido exitosamente');
             setSelectedFile(null);
@@ -57,7 +60,8 @@ const FileManager = () => {
     const handleDownload = async (fileId, fileName) => {
         try {
             const response = await axios.get(`${API_URL}/download/${fileId}`, {
-                responseType: 'blob'
+                responseType: 'blob',
+                withCredentials: true  // <--- CAMBIO: enviar cookies de sesión
             });
             
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -77,7 +81,9 @@ const FileManager = () => {
     const handleDelete = async (fileId) => {
         if (window.confirm('¿Estás seguro de eliminar este archivo?')) {
             try {
-                await axios.delete(`${API_URL}/files/${fileId}`);
+                await axios.delete(`${API_URL}/files/${fileId}`, {
+                    withCredentials: true  // <--- CAMBIO: enviar cookies de sesión
+                });
                 alert('Archivo eliminado');
                 loadFiles();
             } catch (error) {
