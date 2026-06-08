@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "https": "nodemon src/server-https.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "node-cache": "^5.1.2",
+    "node-forge": "^1.4.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "uuid": "^14.0.0"
@@ -28,4 +30,6 @@
   "devDependencies": {
     "nodemon": "^3.1.14"
   }
+
+  
 }

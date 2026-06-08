@@ -15,12 +15,14 @@ const errorHandler = require('./middleware/error.middleware');
 
 // ============ MIDDLEWARE ============
 app.use(cors({
-    origin: 'http://localhost:5173',  // Puerto de React
+    origin: 'https://localhost:5173',  // Puerto de React
     credentials: true  // Permitir cookies de sesión
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.set('trust proxy', 1);
 
 // Configuración de sesión (NECESARIO para Passport)
 app.use(session({
@@ -29,7 +31,9 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         maxAge: 24 * 60 * 60 * 1000,  // 24 horas
-        httpOnly: true
+        httpOnly: true,
+         secure: true,
+    sameSite: 'none'
     }
 }));
 

@@ -12,8 +12,8 @@ router.get('/google',
 // Ruta donde GOOGLE REDIRIGE después de la autenticación
 router.get('/google/callback',
     passport.authenticate('google', {
-        successRedirect: 'http://localhost:5173/dashboard',  // A donde va si funciona
-        failureRedirect: 'http://localhost:5173/login'      // A donde va si falla
+        successRedirect: 'https://localhost:5173/dashboard',  // A donde va si funciona
+        failureRedirect: 'https://localhost:5173/login'      // A donde va si falla
     })
 );
 
