@@ -19,19 +19,52 @@ router.get('/google/callback',
 
 // Ruta para CERRAR sesión
 router.get('/logout', (req, res) => {
+
+    delete req.session.user;
+
     req.logout((err) => {
+
         if (err) {
-            console.error('Error al cerrar sesión:', err);
-            return res.status(500).json({ error: 'Error al cerrar sesión' });
+
+            return res.status(500).json({
+                error: 'Error al cerrar sesión'
+            });
+
         }
-        res.json({ message: 'Sesión cerrada exitosamente' });
+
+        req.session.destroy(() => {
+
+            res.json({
+                message: 'Sesión cerrada exitosamente'
+            });
+
+        });
+
     });
+
 });
 
 // Ruta para obtener el USUARIO ACTUAL (ver si está logueado)
 router.get('/current-user', (req, res) => {
+
+    // Usuario docente
+    if (req.session.user) {
+
+        return res.json({
+            isAuthenticated: true,
+            user: {
+                id: req.session.user.id,
+                username: req.session.user.username,
+                role: req.session.user.role
+            }
+        });
+
+    }
+
+    // Usuario Google
     if (req.isAuthenticated()) {
-        res.json({
+
+        return res.json({
             isAuthenticated: true,
             user: {
                 id: req.user.id,
@@ -40,9 +73,14 @@ router.get('/current-user', (req, res) => {
                 photo: req.user.photo
             }
         });
-    } else {
-        res.json({ isAuthenticated: false, user: null });
+
     }
+
+    return res.json({
+        isAuthenticated: false,
+        user: null
+    });
+
 });
 
 module.exports = router;

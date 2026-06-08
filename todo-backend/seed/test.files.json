@@ -1,0 +1,51 @@
+[{
+  "_id": {
+    "$oid": "6a17a58ed04f49d8d090c5fe"
+  },
+  "filename": "a4e3e615-08aa-4f73-a141-6998d02a2634.pptx",
+  "originalName": "Google_Auth_Presentacion (1).pptx",
+  "fileType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "fileSize": 85299,
+  "filePath": "C:\\Users\\Diego Mirabal\\Documents\\UMSS\\Programacion Web\\todolistpweb\\todo-backend\\uploads\\a4e3e615-08aa-4f73-a141-6998d02a2634.pptx",
+  "description": "",
+  "uploadedBy": "usuario",
+  "downloads": 0,
+  "createdAt": {
+    "$date": "2026-05-28T02:16:46.710Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1ecfdb864e713c76b28665"
+  },
+  "filename": "0cbc4d2a-b080-48c8-8de3-62e92e62f4b5.docx",
+  "originalName": "Promises_JavaScript.docx",
+  "fileType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "fileSize": 30681,
+  "filePath": "C:\\Users\\Diego Mirabal\\Documents\\UMSS\\Programacion Web\\todolistpweb\\todo-backend\\uploads\\0cbc4d2a-b080-48c8-8de3-62e92e62f4b5.docx",
+  "description": "archivo word",
+  "uploadedBy": "usuario",
+  "downloads": 1,
+  "createdAt": {
+    "$date": "2026-06-02T12:43:07.589Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a2652cd57d89987b81aeec6"
+  },
+  "filename": "8b65e2e6-2b28-4e6f-9fbe-735458af8489.txt",
+  "originalName": "1.6 (1).txt",
+  "fileType": "text/plain",
+  "fileSize": 312542,
+  "filePath": "C:\\Users\\Diego Mirabal\\Documents\\UMSS\\Programacion Web\\todolistpweb\\todo-backend\\uploads\\8b65e2e6-2b28-4e6f-9fbe-735458af8489.txt",
+  "description": "archivo texto 2",
+  "uploadedBy": "usuario",
+  "downloads": 0,
+  "createdAt": {
+    "$date": "2026-06-08T05:27:41.482Z"
+  },
+  "__v": 0
+}]

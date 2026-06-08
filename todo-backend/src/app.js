@@ -9,6 +9,7 @@ const app = express();
 const todoRoutes = require('./routes/todo.routes');
 const fileRoutes = require('./routes/file.routes');
 const authRoutes = require('./routes/auth.routes');
+const demoRoutes = require('./routes/demo.routes');
 const errorHandler = require('./middleware/error.middleware');
 
 
@@ -54,6 +55,7 @@ app.get('/', (req, res) => {
 
 // Rutas públicas
 app.use('/auth', authRoutes);
+app.use('/demo', demoRoutes);
 
 // Rutas protegidas (requieren autenticación)
 const { isAuthenticated } = require('./middleware/auth.middleware');

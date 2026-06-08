@@ -1,0 +1,16 @@
+[{
+  "_id": {
+    "$oid": "6a1ecf75864e713c76b28664"
+  },
+  "googleId": "111484342721832274020",
+  "displayName": "Diego Mirabal",
+  "email": "diegomirabalkth@gmail.com",
+  "photo": "https://lh3.googleusercontent.com/a/ACg8ocLzsF-NSOEfmVxqLo8_fgO5gwI5vdi87H9jMEmuorUQ4n1p-myS=s96-c",
+  "createdAt": {
+    "$date": "2026-06-02T12:41:25.166Z"
+  },
+  "lastLogin": {
+    "$date": "2026-06-08T17:04:49.700Z"
+  },
+  "__v": 0
+}]

@@ -1,0 +1,112 @@
+[{
+  "_id": {
+    "$oid": "6a0e80a5a8188a28d4664a41"
+  },
+  "title": "Subir repo a GitHub",
+  "completed": true,
+  "createdAt": {
+    "$date": "2026-05-21T03:48:53.148Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-21T03:48:53.148Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a0f08c2445015b11810b5a3"
+  },
+  "title": "Estudiar MongoDB",
+  "completed": false,
+  "createdAt": {
+    "$date": "2026-05-21T13:29:38.554Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-21T13:29:38.554Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a17a50ad04f49d8d090c5fd"
+  },
+  "title": "tarea de prueba del frontend",
+  "completed": false,
+  "createdAt": {
+    "$date": "2026-05-28T02:14:34.142Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-28T02:14:34.142Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a183e25daf78f1efcecf10c"
+  },
+  "title": "Hacer Metadatos",
+  "completed": true,
+  "createdAt": {
+    "$date": "2026-05-28T13:07:49.502Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-28T13:07:49.502Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a183e3cdaf78f1efcecf10d"
+  },
+  "title": "Hacer Datos Enlace",
+  "completed": true,
+  "createdAt": {
+    "$date": "2026-05-28T13:08:12.594Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-28T13:08:12.594Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a183e50daf78f1efcecf10e"
+  },
+  "title": "Crear Frontend con react",
+  "completed": true,
+  "createdAt": {
+    "$date": "2026-05-28T13:08:32.173Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-28T13:08:32.173Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a26524957d89987b81aeec4"
+  },
+  "title": "actualizar a https",
+  "completed": false,
+  "createdAt": {
+    "$date": "2026-06-08T05:25:29.524Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-08T05:25:29.524Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a26525c57d89987b81aeec5"
+  },
+  "title": "subir a classroom",
+  "completed": false,
+  "createdAt": {
+    "$date": "2026-06-08T05:25:48.793Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-08T05:25:48.793Z"
+  },
+  "__v": 0
+}]
