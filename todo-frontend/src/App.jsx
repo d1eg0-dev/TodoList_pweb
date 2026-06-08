@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import FileManager from './components/FileManager';
 
-// Configurar axios para enviar cookies con cada petición
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -16,20 +15,25 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [metadata, setMetadata] = useState({});
+  const [page, setPage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('todos');
 
-  const API_URL = 'http://localhost:3000/api/todos';
-  const AUTH_URL = 'http://localhost:3000/auth';
+  // URLs con HTTPS
+  const API_URL = 'https://localhost:3000/api/todos';
+  const AUTH_URL = 'https://localhost:3000/auth';
 
   // =========================
   // VERIFICAR SI EL USUARIO ESTÁ LOGUEADO
   // =========================
   const checkAuth = async () => {
     try {
+      console.log('Verificando autenticación...');
       const response = await axios.get(`${AUTH_URL}/current-user`, {
         withCredentials: true
       });
+      console.log('Respuesta auth:', response.data);
       if (response.data.isAuthenticated) {
         setUser(response.data.user);
         setIsAuthenticated(true);
@@ -50,7 +54,7 @@ function App() {
   // INICIAR SESIÓN CON GOOGLE
   // =========================
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/auth/google';
+    window.location.href = 'https://localhost:3000/auth/google';
   };
 
   // =========================
@@ -70,25 +74,33 @@ function App() {
   };
 
   // =========================
-  // Obtener tareas (SOLO SI ESTÁ AUTENTICADO)
+  // Obtener tareas
   // =========================
-  const getTodos = async () => {
-    if (!isAuthenticated) return;
-    
-    try {
-      setLoading(true);
-      const response = await axios.get(API_URL, {
-        withCredentials: true  // ← IMPORTANTE
-      });
-      console.log(response.data);
-      setTodos(response.data.data);
-      setMetadata(response.data.metadata);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const getTodos = async (currentPage = page) => {
+  if (!isAuthenticated) return;
+
+  try {
+    setLoading(true);
+
+    const response = await axios.get(
+      `${API_URL}?page=${currentPage}&limit=5`,
+      {
+        withCredentials: true
+      }
+    );
+
+    setTodos(response.data.data || []);
+    setMetadata(response.data.metadata || {});
+
+    setPage(response.data.metadata.currentPage || 1);
+    setTotalPages(response.data.metadata.totalPages || 1);
+
+  } catch (error) {
+    console.log('Error al obtener tareas:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // =========================
   // Crear tarea
@@ -102,10 +114,10 @@ function App() {
         title,
         completed: false
       }, {
-        withCredentials: true  // ← IMPORTANTE
+        withCredentials: true
       });
       setTitle('');
-      getTodos();
+      getTodos(page);
     } catch (error) {
       console.log(error);
     }
@@ -119,13 +131,27 @@ function App() {
     
     try {
       await axios.delete(`${API_URL}/${id}`, {
-        withCredentials: true  // ← IMPORTANTE
+        withCredentials: true
       });
-      getTodos();
+      getTodos(page);
     } catch (error) {
       console.log(error);
     }
   };
+
+    const nextPage = () => {
+      if (page < totalPages) {
+        setPage(page + 1);
+       }
+    };
+
+    const prevPage = () => {
+       if (page > 1) {
+        setPage(page - 1);
+       }
+     };
+  
+
 
   // =========================
   // Cargar al iniciar
@@ -134,14 +160,12 @@ function App() {
     checkAuth();
   }, []);
 
-  // Cuando cambia la autenticación, cargar tareas
-  useEffect(() => {
-    if (isAuthenticated) {
-      getTodos();
-    }
-  }, [isAuthenticated]);
+ useEffect(() => {
+  if (isAuthenticated) {
+    getTodos(page);
+  }
+}, [isAuthenticated, page]);
 
-  // Si está cargando la autenticación, mostrar loading
   if (authLoading) {
     return (
       <div style={styles.loadingContainer}>
@@ -150,7 +174,6 @@ function App() {
     );
   }
 
-  // Si NO está autenticado, mostrar pantalla de LOGIN
   if (!isAuthenticated) {
     return (
       <div style={styles.loginContainer}>
@@ -158,7 +181,7 @@ function App() {
           <h1 style={styles.loginTitle}>📋 Todo App</h1>
           <p style={styles.loginSubtitle}>Gestiona tus tareas y archivos</p>
           <button onClick={handleGoogleLogin} style={styles.googleButton}>
-            <svg style={styles.googleIcon} viewBox="0 0 24 24">
+            <svg style={styles.googleIcon} viewBox="0 0 24 24" width="20" height="20">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -171,13 +194,8 @@ function App() {
     );
   }
 
-  // =========================
-  // SI ESTÁ AUTENTICADO, MOSTRAR LA APLICACIÓN COMPLETA
-  // =========================
   return (
     <div style={styles.container}>
-
-      {/* Header con información del usuario */}
       <div style={styles.userHeader}>
         <div style={styles.userInfo}>
           {user?.photo && <img src={user.photo} alt={user.displayName} style={styles.userAvatar} />}
@@ -193,33 +211,23 @@ function App() {
 
       <h1>Todo List React + Express</h1>
 
-      {/* Pestañas de navegación */}
       <div style={styles.tabs}>
-        <button
-          style={activeTab === 'todos' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab('todos')}
-        >
+        <button style={activeTab === 'todos' ? styles.tabActive : styles.tab} onClick={() => setActiveTab('todos')}>
           📝 Mis Tareas
         </button>
-        <button
-          style={activeTab === 'files' ? styles.tabActive : styles.tab}
-          onClick={() => setActiveTab('files')}
-        >
+        <button style={activeTab === 'files' ? styles.tabActive : styles.tab} onClick={() => setActiveTab('files')}>
           📁 Mis Archivos
         </button>
       </div>
 
-      {/* Contenido según pestaña activa */}
       {activeTab === 'todos' ? (
         <>
-          {/* Metadata */}
           <div style={styles.metadata}>
-            <p><strong>Total:</strong> {metadata.total}</p>
-            <p><strong>Página:</strong> {metadata.currentPage}</p>
-            <p><strong>API Version:</strong> {metadata.version}</p>
-          </div>
+  <p><strong>Total:</strong> {metadata.total || 0}</p>
+  <p><strong>Página:</strong> {page}</p>
+  <p><strong>Total páginas:</strong> {totalPages}</p>
+</div>
 
-          {/* Formulario */}
           <div style={styles.form}>
             <input
               type="text"
@@ -229,29 +237,54 @@ function App() {
               onKeyPress={(e) => e.key === 'Enter' && createTodo()}
               style={styles.input}
             />
-            <button onClick={createTodo} style={styles.button}>
-              Crear
-            </button>
+            <button onClick={createTodo} style={styles.button}>Crear</button>
           </div>
 
-          {/* Loading */}
           {loading ? (
-            <p>Cargando...</p>
-          ) : (
-            <ul style={styles.list}>
-              {todos.map(todo => (
-                <li key={todo._id} style={styles.item}>
-                  <div>
-                    <h3>{todo.title}</h3>
-                    <p>Estado: {todo.completed ? ' ✅' : ' ❌'}</p>
-                  </div>
-                  <button onClick={() => deleteTodo(todo._id)} style={styles.deleteButton}>
-                    Eliminar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+  <p>Cargando...</p>
+) : (
+  <>
+    <ul style={styles.list}>
+      {todos.map(todo => (
+        <li key={todo._id} style={styles.item}>
+          <div>
+            <h3>{todo.title}</h3>
+            <p>Estado: {todo.completed ? ' ✅' : ' ❌'}</p>
+          </div>
+
+          <button
+            onClick={() => deleteTodo(todo._id)}
+            style={styles.deleteButton}
+          >
+            Eliminar
+          </button>
+        </li>
+      ))}
+    </ul>
+
+    <div style={styles.pagination}>
+      <button
+        onClick={prevPage}
+        disabled={page === 1}
+        style={styles.pageButton}
+      >
+        ← Anterior
+      </button>
+
+      <span style={styles.pageInfo}>
+        Página {page} de {totalPages}
+      </span>
+
+      <button
+        onClick={nextPage}
+        disabled={page === totalPages}
+        style={styles.pageButton}
+      >
+        Siguiente →
+      </button>
+    </div>
+  </>
+)}
         </>
       ) : (
         <FileManager />
@@ -260,9 +293,6 @@ function App() {
   );
 }
 
-// =========================
-// ESTILOS
-// =========================
 const styles = {
   loginContainer: {
     display: 'flex',
@@ -312,8 +342,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
-    textAlign: 'center'
+    minHeight: '100vh'
   },
   userHeader: {
     display: 'flex',
@@ -355,7 +384,8 @@ const styles = {
   container: {
     maxWidth: '900px',
     margin: '40px auto',
-    fontFamily: 'Arial'
+    fontFamily: 'Arial',
+    padding: '20px'
   },
   tabs: {
     display: 'flex',
@@ -370,8 +400,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    borderRadius: '5px',
-    transition: 'all 0.3s'
+    borderRadius: '5px'
   },
   tabActive: {
     padding: '10px 20px',
@@ -397,7 +426,10 @@ const styles = {
   },
   input: {
     flex: 1,
-    padding: '10px'
+    padding: '10px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '5px'
   },
   button: {
     padding: '10px 20px',
@@ -421,10 +453,10 @@ const styles = {
     marginBottom: '10px'
   },
   deleteButton: {
-    background: 'red',
+    background: '#f44336',
     color: 'white',
     border: 'none',
-    padding: '10px',
+    padding: '10px 15px',
     cursor: 'pointer',
     borderRadius: '5px'
   }
