@@ -16,7 +16,7 @@ function App() {
   const [title, setTitle] = useState('');
   const [metadata, setMetadata] = useState({});
   const [page, setPage] = useState(1);
-const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('todos');
 
@@ -28,26 +28,57 @@ const [totalPages, setTotalPages] = useState(1);
   // VERIFICAR SI EL USUARIO ESTÁ LOGUEADO
   // =========================
   const checkAuth = async () => {
+
     try {
-      console.log('Verificando autenticación...');
-      const response = await axios.get(`${AUTH_URL}/current-user`, {
-        withCredentials: true
-      });
-      console.log('Respuesta auth:', response.data);
+
+      // Primero revisa login local
+      let response = await axios.get(
+        'https://localhost:3000/demo/current-user',
+        {
+          withCredentials: true
+        }
+      );
+
       if (response.data.isAuthenticated) {
+
         setUser(response.data.user);
         setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-        setUser(null);
+        return;
+
       }
+
+      // Si no hay login local, revisa Google
+      response = await axios.get(
+        `${AUTH_URL}/current-user`,
+        {
+          withCredentials: true
+        }
+      );
+
+      if (response.data.isAuthenticated) {
+
+        setUser(response.data.user);
+        setIsAuthenticated(true);
+
+      } else {
+
+        setUser(null);
+        setIsAuthenticated(false);
+
+      }
+
     } catch (error) {
-      console.error('Error al verificar autenticación:', error);
-      setIsAuthenticated(false);
+
+      console.error(error);
       setUser(null);
+      setIsAuthenticated(false);
+
     } finally {
+
       setAuthLoading(false);
+
     }
+
   };
 
   // =========================
@@ -55,6 +86,37 @@ const [totalPages, setTotalPages] = useState(1);
   // =========================
   const handleGoogleLogin = () => {
     window.location.href = 'https://localhost:3000/auth/google';
+  };
+  const handleDocenteLogin = async () => {
+
+    try {
+
+      await axios.get(
+        'https://localhost:3000/auth/logout',
+        {
+          withCredentials: true
+        }
+      );
+
+      await axios.post(
+        'https://localhost:3000/demo/login',
+        {
+          username: 'docente',
+          password: 'docente123'
+        },
+        {
+          withCredentials: true
+        }
+      );
+
+      await checkAuth();
+
+    } catch (error) {
+
+      console.error('Error login docente:', error);
+
+    }
+
   };
 
   // =========================
@@ -77,30 +139,30 @@ const [totalPages, setTotalPages] = useState(1);
   // Obtener tareas
   // =========================
   const getTodos = async (currentPage = page) => {
-  if (!isAuthenticated) return;
+    if (!isAuthenticated) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const response = await axios.get(
-      `${API_URL}?page=${currentPage}&limit=5`,
-      {
-        withCredentials: true
-      }
-    );
+      const response = await axios.get(
+        `${API_URL}?page=${currentPage}&limit=5`,
+        {
+          withCredentials: true
+        }
+      );
 
-    setTodos(response.data.data || []);
-    setMetadata(response.data.metadata || {});
+      setTodos(response.data.data || []);
+      setMetadata(response.data.metadata || {});
 
-    setPage(response.data.metadata.currentPage || 1);
-    setTotalPages(response.data.metadata.totalPages || 1);
+      setPage(response.data.metadata.currentPage || 1);
+      setTotalPages(response.data.metadata.totalPages || 1);
 
-  } catch (error) {
-    console.log('Error al obtener tareas:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error) {
+      console.log('Error al obtener tareas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // =========================
   // Crear tarea
@@ -128,7 +190,7 @@ const [totalPages, setTotalPages] = useState(1);
   // =========================
   const deleteTodo = async (id) => {
     if (!isAuthenticated) return;
-    
+
     try {
       await axios.delete(`${API_URL}/${id}`, {
         withCredentials: true
@@ -139,18 +201,18 @@ const [totalPages, setTotalPages] = useState(1);
     }
   };
 
-    const nextPage = () => {
-      if (page < totalPages) {
-        setPage(page + 1);
-       }
-    };
+  const nextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+  };
 
-    const prevPage = () => {
-       if (page > 1) {
-        setPage(page - 1);
-       }
-     };
-  
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
 
 
   // =========================
@@ -160,11 +222,11 @@ const [totalPages, setTotalPages] = useState(1);
     checkAuth();
   }, []);
 
- useEffect(() => {
-  if (isAuthenticated) {
-    getTodos(page);
-  }
-}, [isAuthenticated, page]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      getTodos(page);
+    }
+  }, [isAuthenticated, page]);
 
   if (authLoading) {
     return (
@@ -180,12 +242,13 @@ const [totalPages, setTotalPages] = useState(1);
         <div style={styles.loginCard}>
           <h1 style={styles.loginTitle}>📋 Todo App</h1>
           <p style={styles.loginSubtitle}>Gestiona tus tareas y archivos</p>
+          <button onClick={handleDocenteLogin} style={styles.demoButton}>
+            👨‍🏫 Entrar como Docente
+          </button>
+
           <button onClick={handleGoogleLogin} style={styles.googleButton}>
             <svg style={styles.googleIcon} viewBox="0 0 24 24" width="20" height="20">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              ...
             </svg>
             Iniciar sesión con Google
           </button>
@@ -200,8 +263,8 @@ const [totalPages, setTotalPages] = useState(1);
         <div style={styles.userInfo}>
           {user?.photo && <img src={user.photo} alt={user.displayName} style={styles.userAvatar} />}
           <div>
-            <span style={styles.userName}>👋 Hola, {user?.displayName}!</span>
-            <small style={styles.userEmail}>{user?.email}</small>
+            <span style={styles.userName}>👋 Hola, {user?.displayName || user?.username}! </span>
+            <small style={styles.userEmail}>{user?.email || user?.role}</small>
           </div>
         </div>
         <button onClick={handleLogout} style={styles.logoutButton}>
@@ -223,10 +286,10 @@ const [totalPages, setTotalPages] = useState(1);
       {activeTab === 'todos' ? (
         <>
           <div style={styles.metadata}>
-  <p><strong>Total:</strong> {metadata.total || 0}</p>
-  <p><strong>Página:</strong> {page}</p>
-  <p><strong>Total páginas:</strong> {totalPages}</p>
-</div>
+            <p><strong>Total:</strong> {metadata.total || 0}</p>
+            <p><strong>Página:</strong> {page}</p>
+            <p><strong>Total páginas:</strong> {totalPages}</p>
+          </div>
 
           <div style={styles.form}>
             <input
@@ -241,50 +304,50 @@ const [totalPages, setTotalPages] = useState(1);
           </div>
 
           {loading ? (
-  <p>Cargando...</p>
-) : (
-  <>
-    <ul style={styles.list}>
-      {todos.map(todo => (
-        <li key={todo._id} style={styles.item}>
-          <div>
-            <h3>{todo.title}</h3>
-            <p>Estado: {todo.completed ? ' ✅' : ' ❌'}</p>
-          </div>
+            <p>Cargando...</p>
+          ) : (
+            <>
+              <ul style={styles.list}>
+                {todos.map(todo => (
+                  <li key={todo._id} style={styles.item}>
+                    <div>
+                      <h3>{todo.title}</h3>
+                      <p>Estado: {todo.completed ? ' ✅' : ' ❌'}</p>
+                    </div>
 
-          <button
-            onClick={() => deleteTodo(todo._id)}
-            style={styles.deleteButton}
-          >
-            Eliminar
-          </button>
-        </li>
-      ))}
-    </ul>
+                    <button
+                      onClick={() => deleteTodo(todo._id)}
+                      style={styles.deleteButton}
+                    >
+                      Eliminar
+                    </button>
+                  </li>
+                ))}
+              </ul>
 
-    <div style={styles.pagination}>
-      <button
-        onClick={prevPage}
-        disabled={page === 1}
-        style={styles.pageButton}
-      >
-        ← Anterior
-      </button>
+              <div style={styles.pagination}>
+                <button
+                  onClick={prevPage}
+                  disabled={page === 1}
+                  style={styles.pageButton}
+                >
+                  ← Anterior
+                </button>
 
-      <span style={styles.pageInfo}>
-        Página {page} de {totalPages}
-      </span>
+                <span style={styles.pageInfo}>
+                  Página {page} de {totalPages}
+                </span>
 
-      <button
-        onClick={nextPage}
-        disabled={page === totalPages}
-        style={styles.pageButton}
-      >
-        Siguiente →
-      </button>
-    </div>
-  </>
-)}
+                <button
+                  onClick={nextPage}
+                  disabled={page === totalPages}
+                  style={styles.pageButton}
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </>
+          )}
         </>
       ) : (
         <FileManager />
@@ -333,6 +396,17 @@ const styles = {
     fontSize: '16px',
     cursor: 'pointer',
     width: '100%'
+  },
+  demoButton: {
+    marginTop: '10px',
+    width: '100%',
+    padding: '12px',
+    border: 'none',
+    borderRadius: '4px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    cursor: 'pointer',
+    fontSize: '16px'
   },
   googleIcon: {
     width: '20px',
